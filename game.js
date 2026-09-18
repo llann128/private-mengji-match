@@ -45,6 +45,7 @@ function setupPicker() {
   $("characterPicker").innerHTML = CHARACTERS.map(([name, file], i) => `
     <button class="character-option" data-type="${i}" aria-label="${name}" aria-pressed="false">
       <img src="./assets/${file}" alt="${name}" draggable="false">
+      <span class="character-name">${name}</span>
     </button>`).join("");
   $("characterPicker").addEventListener("click", event => {
     const button = event.target.closest(".character-option");
@@ -87,9 +88,12 @@ function changeLevel(delta) {
 
 function updatePicker() {
   document.querySelectorAll(".character-option").forEach(button => {
-    const selected = state.selectedTypes.includes(Number(button.dataset.type));
+    const selectedIndex = state.selectedTypes.indexOf(Number(button.dataset.type));
+    const selected = selectedIndex >= 0;
     button.classList.toggle("selected", selected);
     button.classList.toggle("limit", !selected && state.selectedTypes.length === 6);
+    if (selected) button.dataset.order = selectedIndex + 1;
+    else delete button.dataset.order;
     button.setAttribute("aria-pressed", String(selected));
   });
   $("selectedCount").textContent = `${state.selectedTypes.length} / 6`;
