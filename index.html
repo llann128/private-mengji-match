@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#ffd85f">
+  <meta name="description" content="梦叽点点消：点击自动消除相邻的同角色，消除后图案下落且不再补充。">
+  <title>梦叽点点消</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='17' fill='%23ffd85f'/%3E%3Ccircle cx='32' cy='34' r='19' fill='%23fff4b0' stroke='%236b4823' stroke-width='4'/%3E%3Cpath d='M22 33l5 4-5 4M42 33l-5 4 5 4M29 45l3-3 3 3' fill='none' stroke='%236b4823' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <section id="pickScreen" class="screen pick-screen active" aria-labelledby="gameTitle">
+      <header class="brand">
+        <div class="brand-badge">梦叽</div>
+        <h1 id="gameTitle">点点消</h1>
+        <p>选出 6 个角色，点击相邻同类，一碰全消</p>
+      </header>
+
+      <div class="level-row" aria-label="选择关卡">
+        <button id="prevLevel" class="circle-button" aria-label="上一关">‹</button>
+        <div><span>当前关卡</span><strong id="pickLevel">第 1 关</strong></div>
+        <button id="nextLevel" class="circle-button" aria-label="下一关">›</button>
+      </div>
+
+      <div class="difficulty-card">
+        <div class="difficulty-title"><span>难度模式</span><small id="difficultyDetail">13 步 · 达成最优分的 75%</small></div>
+        <div id="difficultyPicker" class="difficulty-picker" role="radiogroup" aria-label="选择难度">
+          <button class="difficulty-option" data-difficulty="easy" role="radio" aria-checked="false"><b>轻松</b><span>步数更多</span></button>
+          <button class="difficulty-option" data-difficulty="normal" role="radio" aria-checked="true"><b>标准</b><span>均衡挑战</span></button>
+          <button class="difficulty-option" data-difficulty="hard" role="radio" aria-checked="false"><b>挑战</b><span>少步高分</span></button>
+        </div>
+      </div>
+
+      <div class="picker-card">
+        <div class="picker-title"><span>本局角色</span><strong id="selectedCount">0 / 6</strong></div>
+        <div id="characterPicker" class="character-picker"></div>
+      </div>
+
+      <div class="pick-actions">
+        <button id="randomPick" class="button button-light">随机选择</button>
+        <button id="startGame" class="button button-main" disabled>开始游戏</button>
+      </div>
+    </section>
+
+    <section id="gameScreen" class="screen game-screen" aria-label="游戏棋盘">
+      <header class="game-header">
+        <button id="backButton" class="circle-button" aria-label="返回选角">‹</button>
+        <div><h2>梦叽点点消</h2><span id="gameLevel">第 1 关</span></div>
+        <button id="restartButton" class="circle-button restart" aria-label="重新开始">↻</button>
+      </header>
+
+      <section class="score-card" aria-label="关卡进度">
+        <div class="score-copy">
+          <div><span>累计得分</span><strong><b id="scoreText">0</b> / <b id="targetText">650</b></strong></div>
+          <div class="moves-box"><span>剩余步数</span><strong id="movesText">13</strong></div>
+        </div>
+        <div class="progress-track"><span id="progressBar"></span></div>
+        <div class="score-foot"><span id="remainingText">剩余 64 个</span><span id="comboHint">点击相邻同类自动消除</span></div>
+      </section>
+
+      <div class="board-wrap">
+        <div id="board" class="board" aria-label="点击消除棋盘"></div>
+      </div>
+
+      <div class="rules-strip" aria-label="计分规则">
+        <span><b>2</b>个 +20</span><i></i><span><b>3</b>个 +45</span><i></i><span><b>4</b>个 +80</span><i></i><span><b>5+</b> 连击加成</span>
+      </div>
+
+      <nav class="tools" aria-label="游戏道具">
+        <button id="undoTool" class="tool-button">
+          <span class="tool-icon">↶</span><span>反悔一步</span><b id="undoCount">2</b>
+        </button>
+        <button id="hammerTool" class="tool-button">
+          <span class="tool-icon">🔨</span><span>敲掉一个</span><b id="hammerCount">2</b>
+        </button>
+      </nav>
+    </section>
+  </main>
+
+  <div id="quizModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="quizTitle">
+    <div class="modal-card quiz-card">
+      <div class="quiz-kicker">KPL 小考验</div>
+      <h3 id="quizTitle"></h3>
+      <div id="quizOptions" class="quiz-options"></div>
+      <p id="quizFeedback" class="quiz-feedback" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <div id="resultModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+    <div class="modal-card">
+      <div id="resultIcon" class="result-icon">★</div>
+      <h3 id="resultTitle">过关啦</h3>
+      <p id="resultText"></p>
+      <div class="modal-actions">
+        <button id="retryButton" class="button button-light">再玩一次</button>
+        <button id="continueButton" class="button button-main">下一关</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./game.js"></script>
+</body>
+</html>
